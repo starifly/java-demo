@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+
+    parameters {
+        // 提供要部署的服务器选项
+        choice(
+            description: '你须要选择哪一个环境进行部署 ?',
+            name: 'env',
+            choices: ['测试环境', '线上环境']
+        ) 
+        // 提供构建的模块选项
+        choice(
+            description: '你须要选择哪一个模块进行构建 ?',
+            name: 'moduleName',
+            choices: ['kuaimen-contract', 'kuaimen-core', 'kuaimen-eureka-server', 'kuaimen-manage', 'kuaimen-member', 'kuaimen-order', 'kuaimen-shop', 'tiemuzhen-manage']
+        )   
+        booleanParam(name: 'isAll', defaultValue: false, description: '是否须要全量（包含clean && build）')     
+        string(name: 'update', defaultValue: '', description: '本次更新内容?')    
+    }
+
+    triggers{
+        GenericTrigger(
+            genericVariables: [
+              [key: 'ref', value: '$.ref']
+             ],
+            causeString: 'Triggered on $ref',
+            token: '123456',
+            printContributedVariables: true,
+            printPostContent: true,
+            //silentResponse: false,
+            regexpFilterText: '$ref',
+            regexpFilterExpression: '^refs/heads/(develop)$'
+        )
+    }
+
+    stages {
+        stage('拉取代码') {
+            steps {
+                script {
+	            if(params.branch == 'main'){
+                        echo '拉取主支代码完成'
+                    }
+	            if(params.branch == 'develop'){
+                        echo '拉取开发分支代码完成'
+                    }
+                }
+            }
+        }
+    }
+}
